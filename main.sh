@@ -31,8 +31,6 @@ fi
 UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
 RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
 
-echo "${GH_TOKEN}" | sed "s/^\$/_/g" | gh auth login --with-token
-
 if [[ $1 = '--destroy' ]]; then
     echo "Unregister runner"
     # Set up destroy script
