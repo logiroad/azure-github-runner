@@ -1,17 +1,17 @@
 #!/bin/bash
-set -ex
+set -e
 
 type az gh > /dev/null
 
-template_install() {
-    template_file="install.sh"
+template_setup() {
+    template_file="setup.sh"
     sed_script="s|{{token}}|${RUNNER_TOKEN}|g"
     sed_script="${sed_script};s|{{repo}}|${GITHUB_REPO}|g"
     sed_script="${sed_script};s|{{label}}|${UNIQ_LABEL}|g"
     sed "${sed_script}" "${template_file}.template" > "${template_file}"
 }
 
-: "${RESOURCE_GROUP_NAME:=testazcli}"
+: "${RESOURCE_GROUP_NAME:=ghrunner}"
 : "${LOCATION:=northeurope}"
 : "${VM_IMAGE:=Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest}"
 : "${VM_SIZE:=Standard_B1s}"
@@ -34,7 +34,7 @@ RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners
 if [[ $1 = '--destroy' ]]; then
     echo "Unregister runner"
     # Set up destroy script
-    template_install
+    template_setup
     VM_IP=$(az vm show --show-details --resource-group "${RESOURCE_GROUP_NAME}" --name "${VM_NAME}" --query publicIps --output tsv)
     ssh-keyscan "${VM_IP}" >> "${HOME}/.ssh/known_hosts"
     ssh "${VM_USERNAME}@${VM_IP}" 'bash -s -- --destroy' < install.sh
@@ -50,7 +50,7 @@ echo "Creating resource group"
 az group create --name "${RESOURCE_GROUP_NAME}" --location "${LOCATION}" --output none
 
 # Set up install script
-template_install
+template_setup
 
 # Create the debian vm
 echo "Creating vm"
@@ -61,6 +61,6 @@ az vm create \
     --admin-username "${VM_USERNAME}" \
     --size "${VM_SIZE}" \
     --ssh-key-values "${HOME}/.ssh/id_rsa.pub" \
-    --custom-data install.sh \
+    --custom-data setup.sh \
     --public-ip-sku Standard \
     --output none
