@@ -7,9 +7,6 @@ on:
         type: string
       LOCATION:
         type: string
-      GITHUB_REPO:
-        required: true
-        type: string
     secrets:
       ARM_CLIENT_ID:
         required: true

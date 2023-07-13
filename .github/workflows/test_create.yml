@@ -26,7 +26,7 @@ jobs:
   delete:
     needs: testrunner
     if: ${{ always() }}
-    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@main
+    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@azcli
     with:
       VM_SIZE: Standard_B1s
       LOCATION: northeurope
