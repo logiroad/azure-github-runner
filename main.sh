@@ -11,10 +11,6 @@ template_install() {
     sed "${sed_script}" "${template_file}.template" > "${template_file}"
 }
 
-login_github() {
-    echo "${GH_TOKEN}" | gh auth login --with-token
-}
-
 : "${RESOURCE_GROUP_NAME:='testazcli'}"
 : "${LOCATION:='northeurope'}"
 : "${VM_IMAGE:='Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest'}"
@@ -31,8 +27,6 @@ if [[ -z $GH_TOKEN ]];then
     >&2 echo "env var GH_TOKEN not defined" 
     exit 1
 fi
-
-login_github
 
 UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
 RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
