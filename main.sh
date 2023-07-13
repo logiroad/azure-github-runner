@@ -37,7 +37,7 @@ if [[ $1 = '--destroy' ]]; then
     template_setup
     VM_IP=$(az vm show --show-details --resource-group "${RESOURCE_GROUP_NAME}" --name "${VM_NAME}" --query publicIps --output tsv)
     ssh-keyscan "${VM_IP}" >> "${HOME}/.ssh/known_hosts"
-    ssh "${VM_USERNAME}@${VM_IP}" 'bash -s -- --destroy' < install.sh
+    ssh "${VM_USERNAME}@${VM_IP}" 'bash -s -- --destroy' < setup.sh
     ssh-keygen -R "${VM_IP}"
     # Delete the resource group
     echo "Deleting resource group"
@@ -49,7 +49,7 @@ fi
 echo "Creating resource group"
 az group create --name "${RESOURCE_GROUP_NAME}" --location "${LOCATION}" --output none
 
-# Set up install script
+# Set up setup script
 template_setup
 
 # Create the debian vm
