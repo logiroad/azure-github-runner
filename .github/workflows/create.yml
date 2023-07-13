@@ -1,0 +1,55 @@
+name: create
+
+on:
+  workflow_call:
+    inputs:
+      VM_SIZE:
+        type: string
+      LOCATION:
+        type: string
+      GITHUB_REPO:
+        required: true
+        type: string
+    secrets:
+      ARM_CLIENT_ID:
+        required: true
+      ARM_CLIENT_SECRET:
+        required: true
+      ARM_TENANT_ID:
+        required: true
+      ARM_SUBSCRIPTION_ID:
+        required: true
+      GH_TOKEN:
+        description: token with admin repo privilege
+        required: true
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: logiroad/azure-github-runner
+      -
+        name: Generate ssh key
+        run: ssh-keygen -b 2048 -f ~/.ssh/id_rsa -N ""
+      -
+        name: Config ssh
+        run: touch ~/.ssh/known_hosts
+      -
+        name: upload ssh key
+        uses: actions/upload-artifact@v3
+        with:
+          name: ssh
+          path: ~/.ssh/
+          retention-days: 1
+      -
+        name: login to azure
+        uses: Azure/login@v1
+        with:
+          creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
+      -
+        name: test login
+        run: az account show

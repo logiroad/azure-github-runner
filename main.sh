@@ -5,7 +5,7 @@ type az gh > /dev/null
 
 template_install() {
     template_file="install.sh"
-    sed_script="s|{{token}}|${TOKEN}|g"
+    sed_script="s|{{token}}|${RUNNER_TOKEN}|g"
     sed_script="${sed_script};s|{{repo}}|${GITHUB_REPO}|g"
     sed_script="${sed_script};s|{{label}}|${UNIQ_LABEL}|g"
     sed "${sed_script}" "${template_file}.template" > "${template_file}"
@@ -13,8 +13,9 @@ template_install() {
 
 : "${RESOURCE_GROUP_NAME:='testazcli'}"
 : "${LOCATION:='northeurope'}"
-VM_NAME="${RESOURCE_GROUP_NAME}vm"
 : "${VM_IMAGE:='Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest'}"
+: "${VM_SIZE:='Standard_B1s'}"
+VM_NAME="${RESOURCE_GROUP_NAME}vm"
 VM_USERNAME='vm'
 
 if [[ -z $GITHUB_REPO ]];then
@@ -22,8 +23,15 @@ if [[ -z $GITHUB_REPO ]];then
     exit 1
 fi
 
-UNIQ_LABEL=$(cat /dev/urandom | tr -cd '[:alpha:]' | head -c 6)
-TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
+if [[ -z $GH_TOKEN ]];then
+    >&2 echo "env var GH_TOKEN not defined" 
+    exit 1
+fi
+
+UNIQ_LABEL=$(cat /dev/urandom | tr -cd '[:alpha:]' | head -c 8)
+RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
+
+echo "${GH_TOKEN}" | sed "s/^\$/_/g" | gh auth login --with-token
 
 if [[ $1 = '--destroy' ]]; then
     echo "Unregister runner"
@@ -53,7 +61,7 @@ az vm create \
     --name $VM_NAME \
     --image $VM_IMAGE \
     --admin-username $VM_USERNAME \
-    --size "Standard_B1s" \
+    --size $VM_SIZE \
     --ssh-key-values "${HOME}/.ssh/id_rsa.pub" \
     --custom-data install.sh \
     --public-ip-sku Standard \

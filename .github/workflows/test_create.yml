@@ -1,0 +1,39 @@
+name: test create runner
+
+on:
+  push:
+    branches:
+      - "azcli"
+  workflow_dispatch:
+
+jobs:
+  create:
+    uses: logiroad/azure-github-runner/.github/workflows/create.yml@azcli
+    with:
+      VM_SIZE: Standard_B1s
+      LOCATION: northeurope
+    secrets:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  testrunner:
+    runs-on: [self-hosted, azure]
+    needs: create
+    steps:
+      - run: echo Hello world from azure
+  delete:
+    needs: testrunner
+    if: ${{ always() }}
+    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@main
+    with:
+      VM_SIZE: Standard_B1s
+      LOCATION: northeurope
+    secrets:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
