@@ -28,7 +28,7 @@ if [[ -z $GH_TOKEN ]];then
     exit 1
 fi
 
-UNIQ_LABEL=$(cat /dev/urandom | tr -cd '[:alpha:]' | head -c 8)
+UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
 RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
 
 echo "${GH_TOKEN}" | sed "s/^\$/_/g" | gh auth login --with-token
