@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 
 type az gh > /dev/null
 

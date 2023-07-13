@@ -31,9 +31,6 @@ jobs:
           repository: logiroad/azure-github-runner
           ref: azcli
       -
-        name: ls
-        run: ls -a
-      -
         name: Generate ssh key
         run: ssh-keygen -b 2048 -f ~/.ssh/id_rsa -N ""
       -
@@ -52,8 +49,8 @@ jobs:
         with:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
       -
-        name: test login
+        name: run script
         env:
           GITHUB_REPO: logiroad/azure-github-runner
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: bash main.sh
+        run: bash ./main.sh
