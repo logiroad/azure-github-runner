@@ -4,7 +4,6 @@
 if [[ $UID = 0 ]]; then
     regular_user="$(id -un -- 1000)"
     chown "${regular_user}" "$0"
-    # chmod +rx "$0"
     su -c "bash '$0'" "${regular_user}"
     exit 0
 fi
