@@ -7,7 +7,7 @@ template_setup() {
     template_file="setup.sh"
     sed_script="s|{{token}}|${RUNNER_TOKEN}|g"
     sed_script="${sed_script};s|{{repo}}|${GITHUB_REPO}|g"
-    sed_script="${sed_script};s|{{label}}|${UNIQ_LABEL}|g"
+    sed_script="${sed_script};s|{{label}}|${LABEL}|g"
     sed "${sed_script}" "${template_file}.template" > "${template_file}"
 }
 
@@ -28,7 +28,7 @@ if [[ -z "${GH_TOKEN}" ]];then
     exit 1
 fi
 
-UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
+LABEL=azure
 RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
 
 if [[ $1 = '--destroy' ]]; then
