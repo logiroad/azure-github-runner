@@ -18,9 +18,15 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  test:
+    runs-on: [self-hosted, azure]
+    steps:
+      - run: echo Hello world
+    
   delete:
     needs: create
     uses: logiroad/azure-github-runner/.github/workflows/delete.yml@azcli
+    if: ${{ always() }}
     secrets:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
