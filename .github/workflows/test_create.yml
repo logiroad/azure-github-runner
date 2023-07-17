@@ -1,9 +1,6 @@
 name: test create runner
 
 on:
-  push:
-    branches:
-      - "azcli"
   workflow_dispatch:
 
 jobs:
