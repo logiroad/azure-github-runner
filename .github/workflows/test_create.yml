@@ -20,11 +20,12 @@ jobs:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
   test:
     runs-on: [self-hosted, azure]
+    needs: create
     steps:
       - run: echo Hello world
     
   delete:
-    needs: create
+    needs: test
     uses: logiroad/azure-github-runner/.github/workflows/delete.yml@azcli
     if: ${{ always() }}
     secrets:
