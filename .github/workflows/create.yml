@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: logiroad/azure-github-runner
-          ref: main
+          ref: v1
       -
         name: Generate ssh key
         run: ssh-keygen -b 2048 -f ~/.ssh/id_rsa -N ""
@@ -59,4 +59,7 @@ jobs:
         env:
           GITHUB_REPO: logiroad/azure-github-runner
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+          VM_SIZE: ${{ inputs.VM_SIZE }}
+          LOCATION: ${{ inputs.LOCATION }}
         run: bash ./main.sh | jq -r 'keys[] as $k | "\($k)=\(.[$k])"' >> "$GITHUB_OUTPUT"

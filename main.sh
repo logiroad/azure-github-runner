@@ -11,13 +11,6 @@ template_setup() {
     sed "${sed_script}" "${template_file}.template" > "${template_file}"
 }
 
-: "${RESOURCE_GROUP_NAME:=ghrunner}"
-: "${LOCATION:=northeurope}"
-: "${VM_IMAGE:=Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest}"
-: "${VM_SIZE:=Standard_B1s}"
-VM_NAME="${RESOURCE_GROUP_NAME}vm"
-VM_USERNAME='vm'
-
 if [[ -z "${GITHUB_REPO}" ]];then
     >&2 echo "env var GITHUB_REPO not defined" 
     exit 1
@@ -27,6 +20,19 @@ if [[ -z "${GH_TOKEN}" ]];then
     >&2 echo "env var GH_TOKEN not defined" 
     exit 1
 fi
+
+if [[ -z "${RUN_ID}" ]];then
+    >&2 echo "env var RUN_ID not defined" 
+    exit 1
+fi
+
+RESOURCE_GROUP_NAME="${RESOURCE_GROUP_NAME:-ghrunner}${RUN_ID}"
+: "${LOCATION:=northeurope}"
+: "${VM_IMAGE:=Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest}"
+: "${VM_SIZE:=Standard_B1s}"
+VM_NAME="${RESOURCE_GROUP_NAME}vm"
+VM_USERNAME='vm'
+
 
 UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
 LABEL="azure,${UNIQ_LABEL}"

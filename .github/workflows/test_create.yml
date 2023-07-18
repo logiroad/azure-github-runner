@@ -5,10 +5,10 @@ on:
 
 jobs:
   create:
-    uses: logiroad/azure-github-runner/.github/workflows/create.yml@main
+    uses: logiroad/azure-github-runner/.github/workflows/create.yml@v1
     with:
-      VM_SIZE: Standard_B1s
-      LOCATION: northeurope
+      VM_SIZE: Standard_B2s
+      LOCATION: francecentral
     secrets:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
@@ -23,7 +23,7 @@ jobs:
     
   delete:
     needs: test
-    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@main
+    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@v1
     if: ${{ always() }}
     secrets:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
@@ -31,4 +31,3 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
