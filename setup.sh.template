@@ -15,6 +15,11 @@ if [[ $1 = '--destroy' ]]; then
     exit 0
 fi
 
+# Setup deps
+
+sudo apt-get update
+sudo apt-get install -y git-lfs
+
 # Setup Github runner
 
 VERSION="2.306.0"
@@ -29,8 +34,3 @@ export RUNNER_ALLOW_RUNASROOT=1
 ./config.sh --unattended --url https://github.com/{{repo}} --token {{token}} --labels {{label}}
 sudo ./svc.sh install
 sudo ./svc.sh start
-
-# Setup deps
-
-sudo apt-get update
-sudo apt-get install -y git-lfs
