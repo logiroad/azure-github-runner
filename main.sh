@@ -28,32 +28,29 @@ if [[ -z "${GH_TOKEN}" ]];then
     exit 1
 fi
 
-LABEL=azure
+UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
+LABEL="azure,${UNIQ_LABEL}"
 RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
 
 if [[ $1 = '--destroy' ]]; then
-    echo "Unregister runner"
     # Set up destroy script
     template_setup
     VM_IP=$(az vm show --show-details --resource-group "${RESOURCE_GROUP_NAME}" --name "${VM_NAME}" --query publicIps --output tsv)
-    ssh-keyscan "${VM_IP}" >> "${HOME}/.ssh/known_hosts"
+    ssh-keyscan "${VM_IP}" >> "${HOME}/.ssh/known_hosts" 2> /dev/null
     ssh "${VM_USERNAME}@${VM_IP}" 'bash -s -- --destroy' < setup.sh
     ssh-keygen -R "${VM_IP}"
     # Delete the resource group
-    echo "Deleting resource group"
     az group delete --name "${RESOURCE_GROUP_NAME}" --no-wait --yes --output none
     exit 0
 fi
 
 # Create the resource group
-echo "Creating resource group"
 az group create --name "${RESOURCE_GROUP_NAME}" --location "${LOCATION}" --output none
 
 # Set up setup script
 template_setup
 
 # Create the debian vm
-echo "Creating vm"
 az vm create \
     --resource-group "${RESOURCE_GROUP_NAME}" \
     --name "${VM_NAME}" \
@@ -64,3 +61,16 @@ az vm create \
     --custom-data setup.sh \
     --public-ip-sku Standard \
     --output none
+
+VM_IP=$(az vm show --show-details --resource-group "${RESOURCE_GROUP_NAME}" --name "${VM_NAME}" --query publicIps --output tsv)
+
+jq -n \
+    --arg ip "$VM_IP" \
+    --arg resource_group "$RESOURCE_GROUP_NAME" \
+    --arg location "$LOCATION" \
+    --arg vm_image "$VM_IMAGE" \
+    --arg vm_size "$VM_SIZE" \
+    --arg vm_name "$VM_NAME" \
+    --arg vm_username "$VM_USERNAME" \
+    --arg uniq_label "$UNIQ_LABEL" \
+    '$ARGS.named'

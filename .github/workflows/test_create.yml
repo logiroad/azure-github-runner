@@ -5,7 +5,7 @@ on:
 
 jobs:
   create:
-    uses: logiroad/azure-github-runner/.github/workflows/create.yml@azcli
+    uses: logiroad/azure-github-runner/.github/workflows/create.yml@main
     with:
       VM_SIZE: Standard_B1s
       LOCATION: northeurope
@@ -23,7 +23,7 @@ jobs:
     
   delete:
     needs: test
-    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@azcli
+    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@main
     if: ${{ always() }}
     secrets:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}

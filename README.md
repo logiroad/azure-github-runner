@@ -11,7 +11,7 @@ name: do-the-job
 on: push
 jobs:
   start-runner:
-    uses: logiroad/azure-github-runner/.github/workflows/create.yml@azcli
+    uses: logiroad/azure-github-runner/.github/workflows/create.yml@main
       with:
         VM_SIZE: Standard_B1s
         LOCATION: northeurope
@@ -29,7 +29,7 @@ jobs:
             run: echo 'Hello World!'
   stop-runner:
     needs: do-the-job # required to wait when the main job is done
-    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@azcli
+    uses: logiroad/azure-github-runner/.github/workflows/delete.yml@main
     if: ${{ always() }} # required to stop the runner even if the error happened in the previous jobs
     secrets:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
