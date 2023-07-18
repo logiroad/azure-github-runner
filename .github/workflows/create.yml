@@ -23,6 +23,8 @@ on:
 jobs:
   create:
     runs-on: ubuntu-latest
+    outputs:
+      uniq_label: ${{ steps.vmcreation.outputs.uniq_label }}
     steps:
       -
         name: Checkout
@@ -50,7 +52,8 @@ jobs:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
       -
         name: run script
+        id: vmcreation
         env:
           GITHUB_REPO: logiroad/azure-github-runner
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: bash ./main.sh
+        run: bash ./main.sh | jq -r 'keys[] as $k | "\($k)=\(.[$k])"' >> "$GITHUB_OUTPUT"
