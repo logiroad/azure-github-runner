@@ -23,10 +23,10 @@ jobs:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
   do-the-job:
     needs: start-runner # required to start the main job when the runner is ready
-        runs-on: [self-hosted ,azure] # run the job on the newly created runner
+        runs-on: ${{ needs.create.outputs.uniq_label }} # run the job on the newly created runner
         steps:
           - name: Hello World
-            run: echo 'Hello World!'
+            run: echo 'Hello World from Azure!'
   stop-runner:
     needs: do-the-job # required to wait when the main job is done
     uses: logiroad/azure-github-runner/.github/workflows/delete.yml@main
@@ -37,3 +37,6 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+```
+
+You also have an exemple at [test_create.yml](.github/workflows/test_create.yml)
