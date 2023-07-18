@@ -16,10 +16,10 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.create.outputs.uniq_label }}
     needs: create
     steps:
-      - run: echo ${{ needs.create.outputs.uniq_label }}
+      - run: echo running on azure:${{ needs.create.outputs.uniq_label }}
     
   delete:
     needs: test
