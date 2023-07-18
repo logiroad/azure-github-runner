@@ -42,7 +42,7 @@ jobs:
       -
         name: run script
         env:
-          GITHUB_REPO: logiroad/azure-github-runner
+          GITHUB_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           RUN_ID: ${{ github.run_id }}
         run: bash ./main.sh --destroy
