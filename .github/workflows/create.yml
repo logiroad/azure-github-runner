@@ -19,6 +19,9 @@ on:
       GH_TOKEN:
         description: token with admin repo privilege
         required: true
+    outputs:
+      uniq_label:
+        value: ${{ jobs.create.outputs.uniq_label }}
 
 jobs:
   create:
@@ -57,6 +60,3 @@ jobs:
           GITHUB_REPO: logiroad/azure-github-runner
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: bash ./main.sh | jq -r 'keys[] as $k | "\($k)=\(.[$k])"' >> "$GITHUB_OUTPUT"
-      -
-        name: debug outputs
-        run: echo ${{ steps.vmcreation.outputs.uniq_label }}
