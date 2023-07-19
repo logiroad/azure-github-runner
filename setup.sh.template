@@ -17,10 +17,18 @@ fi
 
 # Setup deps
 
+DOCKER_COMPOSE_VERSION="v2.20.2"
+
 sudo apt-get update
 sudo apt-get install -y \
     git-lfs \
-    jq
+    jq \
+    docker.io
+
+sudo usermod -aG docker "${USER}"
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo wget -O /usr/local/lib/docker/cli-plugins/docker-compose "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 # Setup Github runner
 
