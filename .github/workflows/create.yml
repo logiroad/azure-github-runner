@@ -36,9 +36,21 @@ jobs:
       uniq_label: ${{ steps.vmcreation.outputs.uniq_label }}
     steps:
       -
-        name: test gh auth ok
-        if: ${{ secrets.GH_TOKEN != '' || secrets.GH_APP_ID != '' || secrets.GH_PRIVATE_KEY != '' }}
-        run: 'false'
+        name: Test secrets 1
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
+          GH_PRIVATE_KEY: ${{ secrets.GH_PRIVATE_KEY }}
+        if: ${{ env.GH_TOKEN == '' && (env.GH_APP_ID == '' || env.GH_PRIVATE_KEY == '') }}
+        run: echo Error [GH_TOKEN] or [GH_APP_ID, GH_PRIVATE_KEY] are not defined  >> /dev/stderr; false
+      - 
+        name: Test secrets 2
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_APP_ID: ${{ secrets.GH_APP_ID }}
+          GH_PRIVATE_KEY: ${{ secrets.GH_PRIVATE_KEY }}
+        if: ${{ env.GH_TOKEN != '' && ( env.GH_APP_ID == '' || env.GH_PRIVATE_KEY == '' ) }}
+        run: echo Error [GH_TOKEN] and [GH_APP_ID, GH_PRIVATE_KEY] are defined  >> /dev/stderr; false
       -
         name: Checkout
         uses: actions/checkout@v3
@@ -65,8 +77,8 @@ jobs:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
       -
         name: run script
-        id: vmcreation
-        if: ${{ ${{ secrets.GH_TOKEN }} != '' }}
+        id: vmcreat1
+        if: ${{ env.GH_TOKEN != '' }}
         env:
           GITHUB_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -74,22 +86,25 @@ jobs:
           VM_SIZE: ${{ inputs.VM_SIZE }}
           LOCATION: ${{ inputs.LOCATION }}
         run: bash ./main.sh | jq -r 'keys[] as $k | "\($k)=\(.[$k])"' >> "$GITHUB_OUTPUT"
-      -
-        name: Generate gh token
-        if: ${{ ${{ secrets.GH_TOKEN }} == '' }}
+      - 
         uses: actions/create-github-app-token@v1
-        id: gh-token
+        id: app-token
+        if: ${{ env.GH_TOKEN == '' }}
         with:
           app_id: ${{ secrets.GH_APP_ID }}
           private_key: ${{ secrets.GH_PRIVATE_KEY }}
       -
         name: run script
-        id: vmcreation
-        if: ${{ ${{ secrets.GH_TOKEN }} == '' }}
+        id: vmcreat2
+        if: ${{ steps.app-token.outcome == 'success' }}
         env:
           GITHUB_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ steps.gh-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           RUN_ID: ${{ github.run_id }}
           VM_SIZE: ${{ inputs.VM_SIZE }}
           LOCATION: ${{ inputs.LOCATION }}
         run: bash ./main.sh | jq -r 'keys[] as $k | "\($k)=\(.[$k])"' >> "$GITHUB_OUTPUT"
+      -
+        name: get vmcreation label
+        id: vmcreation
+        run: 'echo "uniq_label=${{ steps.vmcreat1.outputs.uniq_label }}${{ steps.vmcreat2.outputs.uniq_label }}" >> "$GITHUB_OUTPUT"'
