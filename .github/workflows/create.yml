@@ -18,7 +18,13 @@ on:
         required: true
       GH_TOKEN:
         description: token with admin repo privilege
-        required: true
+        required: false
+      GH_APP_ID:
+        description: App id with admin privilege
+        required: false
+      GH_PRIVATE_KEY:
+        description: App private key with admin privilege
+        required: false
     outputs:
       uniq_label:
         value: ${{ jobs.create.outputs.uniq_label }}
@@ -30,11 +36,15 @@ jobs:
       uniq_label: ${{ steps.vmcreation.outputs.uniq_label }}
     steps:
       -
+        name: test gh auth ok
+        if: ${{ secrets.GH_TOKEN != '' || secrets.GH_APP_ID != '' || secrets.GH_PRIVATE_KEY != '' }}
+        run: 'false'
+      -
         name: Checkout
         uses: actions/checkout@v3
         with:
           repository: logiroad/azure-github-runner
-          ref: v1 #FIXME: is there a way to get that dyn?
+          ref: v1.1.0
       -
         name: Generate ssh key
         run: ssh-keygen -b 2048 -f ~/.ssh/id_rsa -N ""
@@ -56,9 +66,29 @@ jobs:
       -
         name: run script
         id: vmcreation
+        if: ${{ ${{ secrets.GH_TOKEN }} != '' }}
         env:
           GITHUB_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+          VM_SIZE: ${{ inputs.VM_SIZE }}
+          LOCATION: ${{ inputs.LOCATION }}
+        run: bash ./main.sh | jq -r 'keys[] as $k | "\($k)=\(.[$k])"' >> "$GITHUB_OUTPUT"
+      -
+        name: Generate gh token
+        if: ${{ ${{ secrets.GH_TOKEN }} == '' }}
+        uses: actions/create-github-app-token@v1
+        id: gh-token
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_PRIVATE_KEY }}
+      -
+        name: run script
+        id: vmcreation
+        if: ${{ ${{ secrets.GH_TOKEN }} == '' }}
+        env:
+          GITHUB_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ steps.gh-token.outputs.token }}
           RUN_ID: ${{ github.run_id }}
           VM_SIZE: ${{ inputs.VM_SIZE }}
           LOCATION: ${{ inputs.LOCATION }}
