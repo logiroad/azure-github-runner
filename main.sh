@@ -34,7 +34,7 @@ VM_NAME="${RESOURCE_GROUP_NAME}vm"
 VM_USERNAME='vm'
 
 
-UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
+test -z "${UNIQ_LABEL}" && UNIQ_LABEL=$(shuf -er -n8  {a..z} | paste -sd "")
 LABEL="azure,${UNIQ_LABEL}"
 RUNNER_TOKEN=$(gh api -XPOST --jq '.token' "repos/${GITHUB_REPO}/actions/runners/registration-token")
 
